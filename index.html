@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Little Photo Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fbeef0;--ink:#3a2a3a;--acc:#e0527e;--card:#ffffffcc;--line:#00000018;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#241a26;--ink:#f6e8f0;--acc:#ff7aa5;--card:#ffffff14;--line:#ffffff22;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#241a26;--ink:#f6e8f0;--acc:#ff7aa5;--card:#ffffff14;--line:#ffffff22;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Bricolage Grotesque',system-ui,sans-serif;transition:background .4s,color .4s;min-height:100vh}
+header{display:flex;align-items:center;gap:12px;padding:12px 18px;flex-wrap:wrap;position:sticky;top:0;z-index:5;background:var(--bg)}
+.brand{font-family:Caveat,cursive;font-size:30px;font-weight:600;color:var(--acc);margin-right:auto}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 16px;font-weight:600}
+button:hover{border-color:var(--acc)}button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+button.big{padding:14px 28px;font-size:18px;background:var(--acc);color:#fff;border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:not-allowed}
+main{max-width:1100px;margin:0 auto;padding:10px 18px 60px}
+section{display:none}section.show{display:block}
+h1{font-size:clamp(36px,7vw,72px);line-height:1;margin:.3em 0 .2em;font-weight:800;letter-spacing:-.03em}
+h2{font-size:26px;margin:.2em 0 .5em}
+.lead{max-width:52ch;font-size:18px;opacity:.85}
+.hero{display:flex;gap:30px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.mini{display:flex;gap:10px;transform:rotate(-5deg)}
+.mini i{display:block;width:66px;height:200px;background:#fff;border-radius:4px;padding:6px;box-shadow:0 8px 20px #0003;display:flex;flex-direction:column;gap:5px}
+.mini i b{flex:1;border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.card{border:2px solid var(--line);background:var(--card);border-radius:20px;padding:16px;text-align:left;cursor:pointer;display:block}
+.card:hover,.card.on{border-color:var(--acc);transform:translateY(-2px)}
+.card .sw{height:64px;border-radius:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:28px;gap:4px}
+.card b{display:block;font-size:17px}.card span{font-size:13px;opacity:.75}
+.cam{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px}
+@media(max-width:800px){.cam,.ed{grid-template-columns:1fr!important}}
+.stage{position:relative;background:#000;border-radius:20px;overflow:hidden;aspect-ratio:var(--ar,1.33);width:100%}
+video{width:100%;height:100%;object-fit:cover;display:block}
+.mir{transform:scaleX(-1)}
+.msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:20px;font-size:17px}
+#cd{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:140px;font-weight:800;color:#fff;text-shadow:0 4px 30px #000a;pointer-events:none}
+#fl{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .35s}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.row label{font-size:14px;display:flex;gap:6px;align-items:center}
+select{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:6px 8px}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
+.slot{aspect-ratio:var(--ar,1.33);border:2px dashed var(--line);border-radius:10px;background:var(--card) center/cover;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;position:relative}
+.slot.sel{border:3px solid var(--acc)}
+.slot u{position:absolute;top:2px;right:4px;text-decoration:none}
+.ed{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+.cwrap{display:flex;justify-content:center;background:var(--card);border-radius:20px;padding:16px}
+canvas{max-width:100%;max-height:78vh;height:auto;box-shadow:0 10px 30px #0003;touch-action:none}
+.panel{background:var(--card);border-radius:20px;padding:14px}
+.panel h3{margin:10px 0 6px;font-size:15px}.panel h3:first-child{margin-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:5px 11px;font-size:13px}
+.sw2{width:30px;height:30px;padding:0;border-radius:50%}
+.st{font-size:22px;padding:2px 8px}
+input[type=text]{width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card)}
+dialog{border:none;border-radius:20px;max-width:900px;width:92vw;background:var(--bg);color:var(--ink)}
+dialog::backdrop{background:#0008}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.gal div{background:var(--card);padding:6px;border-radius:12px}.gal img{width:100%;border-radius:6px}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
+.toast.show{opacity:1}
+html{scroll-behavior:smooth}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+@keyframes drift{to{transform:translate(4%,-3%) scale(1.08) rotate(3deg)}}
+@keyframes print{from{clip-path:inset(0 0 100% 0);transform:translateY(-40px)}to{clip-path:inset(0);transform:none}}
+@keyframes bob{to{transform:translateY(-8px) rotate(1.5deg)}}
+@keyframes pop{0%{transform:scale(.4);opacity:0}30%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:.9}}
+@keyframes printout{from{clip-path:inset(0 0 100% 0);transform:translateY(-24px)}to{clip-path:inset(0);transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 50%,transparent)}70%,100%{box-shadow:0 0 0 18px transparent}}
+body::after{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(40% 35% at 20% 25%,color-mix(in srgb,var(--acc) 22%,transparent),transparent 70%),radial-gradient(35% 30% at 80% 70%,color-mix(in srgb,var(--acc) 14%,transparent),transparent 70%);animation:drift 22s ease-in-out infinite alternate}
+header{background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line)}
+.brand{transition:transform .4s cubic-bezier(.3,1.6,.5,1)}.brand:hover{transform:rotate(-3deg) scale(1.06)}
+nav{background:var(--card);padding:4px;border-radius:999px;border:1px solid var(--line)}
+nav button{border:0;background:transparent;padding:7px 16px}
+nav button.on{background:var(--acc);color:#fff;box-shadow:0 4px 14px color-mix(in srgb,var(--acc) 45%,transparent)}
+button{transition:transform .25s cubic-bezier(.3,1.5,.5,1),box-shadow .25s,background .25s,border-color .25s}
+button:hover:not(:disabled){transform:translateY(-2px)}button:active:not(:disabled){transform:scale(.95)}
+button.big{background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 65%,#fff));border:0;color:#fff;box-shadow:0 8px 22px color-mix(in srgb,var(--acc) 40%,transparent);position:relative;overflow:hidden}
+button.big::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,#fff7 50%,transparent 70%);transform:translateX(-120%);transition:transform .7s}
+button.big:hover::after{transform:translateX(120%)}
+#go:not(:disabled){animation:pulse 2.4s infinite}
+h1{text-wrap:balance;letter-spacing:-.045em;animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
+.lead{animation:rise .9s .15s cubic-bezier(.2,.8,.2,1) both}
+.mini i{animation:print 1.4s .3s cubic-bezier(.2,.8,.2,1) both,bob 5s 1.7s ease-in-out infinite alternate}
+.mini i:nth-child(2){animation-delay:.6s,2s}
+section.show{animation:rise .45s cubic-bezier(.2,.8,.2,1)}
+.card{border-radius:24px;transition:transform .35s cubic-bezier(.3,1.4,.5,1),box-shadow .3s,border-color .3s}
+.card:hover{transform:translateY(-6px) rotate(-.8deg);box-shadow:0 16px 34px color-mix(in srgb,var(--ink) 16%,transparent)}
+.card .sw{transition:transform .4s cubic-bezier(.3,1.6,.5,1)}.card:hover .sw{transform:scale(1.07)}
+#rooms .card{animation:rise .6s both}
+#rooms .card:nth-child(2){animation-delay:.06s}#rooms .card:nth-child(3){animation-delay:.12s}#rooms .card:nth-child(4){animation-delay:.18s}#rooms .card:nth-child(5){animation-delay:.24s}#rooms .card:nth-child(6){animation-delay:.3s}#rooms .card:nth-child(7){animation-delay:.36s}#rooms .card:nth-child(8){animation-delay:.42s}#rooms .card:nth-child(9){animation-delay:.48s}
+.stage{border-radius:28px;box-shadow:0 20px 50px color-mix(in srgb,var(--ink) 25%,transparent)}
+#cd.pop,#cd{animation:pop .9s cubic-bezier(.2,.8,.2,1)}
+.panel,.cwrap{border:1px solid var(--line);border-radius:28px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+canvas.print{animation:printout 1.1s cubic-bezier(.2,.8,.2,1)}
+.slot{transition:transform .3s cubic-bezier(.3,1.5,.5,1),border-color .2s}.slot:hover{transform:scale(1.05)}
+.chips button.sw2:hover{transform:scale(1.2)}.chips button.st:hover{transform:scale(1.25) rotate(8deg)}
+dialog[open]{animation:rise .35s cubic-bezier(.2,.8,.2,1)}dialog::backdrop{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.toast{transform:translate(-50%,20px);transition:opacity .3s,transform .4s cubic-bezier(.3,1.5,.5,1)}.toast.show{transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style></head><body>
+<header><div class="brand">haiko photo studio</div>
+<nav id="nav"></nav>
+<button id="gbtn">My gallery</button><button id="tbtn" aria-label="Toggle dark mode">Dark</button></header>
+<main>
+<section id="s0" class="show">
+ <div class="hero"><div><h1>Your own little photo studio.</h1><p class="lead">Pick a room, pick a booth, and take real photos with your camera. Your pictures stay in this browser.</p></div>
+ <div class="mini" aria-hidden="true"><i><b style="background:#f6b8c9"></b><b style="background:#c9b8f6"></b><b style="background:#b8dff6"></b></i><i style="margin-top:20px"><b style="background:#fde9a8"></b><b style="background:#f6b8c9"></b><b style="background:#c9f6d3"></b></i></div></div>
+ <h2>Choose a room</h2><div class="grid" id="rooms"></div>
+</section>
+<section id="s1"><h2>Choose a booth</h2><div class="grid" id="booths"></div>
+ <div class="row"><button id="b1">Back</button><button class="big" id="n1">Open the camera room</button></div></section>
+<section id="s2"><h2>Take your photos</h2>
+ <div class="cam"><div><div class="stage" id="stage"><video id="v" autoplay playsinline muted></video><div class="msg" id="msg">Camera is off. Press “Turn on camera” — your browser will ask for permission.</div><div id="cd"></div><div id="fl"></div></div>
+  <div class="row"><button id="cam" class="on">Turn on camera</button><button id="flip">Flip camera</button><select id="dev" aria-label="Camera"></select><button id="fs">Fullscreen</button></div></div>
+ <div><div class="row"><label>Timer <select id="tm"><option value="3">3s</option><option value="5">5s</option><option value="10">10s</option><option value="0">None</option></select></label><label><input type="checkbox" id="mi" checked> Mirror</label><label><input type="checkbox" id="snd" checked> Sound</label></div>
+  <div class="row"><button class="big" id="go">Start session</button><button id="one">Retake selected</button></div>
+  <p id="pose" class="lead" style="font-size:16px"></p>
+  <div class="slots" id="slots"></div>
+  <div class="row"><button id="up">Upload instead</button><input type="file" id="file" accept="image/*" multiple hidden><button id="clr">Clear all</button><button id="n2" class="big">Edit &amp; print</button></div></div></div>
+</section>
+<section id="s3"><h2>Make it yours</h2>
+ <div class="ed"><div class="cwrap"><canvas id="cv"></canvas></div>
+ <div class="panel">
+  <h3>Filter</h3><div class="chips" id="fil"></div>
+  <h3>Frame colour</h3><div class="chips" id="frc"></div>
+  <h3>Background</h3><div class="chips" id="pat"></div>
+  <h3>Caption</h3><input type="text" id="cap" maxlength="28" placeholder="Write something sweet">
+  <div class="row"><label><input type="checkbox" id="dt" checked> Date stamp</label></div>
+  <h3>Stickers (drag to move, double-click to remove)</h3><div class="chips" id="stk"></div>
+  <div class="row"><button id="rs">Remove last sticker</button><button id="rnd">Surprise me</button></div>
+  <h3>Download</h3>
+  <div class="row"><select id="fmt"><option value="png">PNG</option><option value="jpeg">JPEG</option></select><select id="qs"><option value="1">Standard</option><option value="2">High-res</option></select></div>
+  <div class="row"><button class="big" id="dl">Download</button><button id="sv">Save to gallery</button></div>
+  <div class="row"><button id="bk">Back to camera</button></div>
+ </div></div>
+</section>
+</main>
+<dialog id="gd"><h2>My gallery</h2><div class="gal" id="gal"></div><div class="row"><button id="gx">Close</button></div></dialog>
+<div class="toast" id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const ROOMS=[
+{id:'retro',n:'Retro Studio',d:'Warm light and film tones',bg:'#f1ddbb',ink:'#3b2a1a',acc:'#c8622d',frame:'#fff4de',f:'Vintage',st:['📷','🎞️','☎️','⭐','🌻']},
+{id:'korean',n:'Korean Photo Studio',d:'Soft pastels, cute stickers',bg:'#e9ecfb',ink:'#2d3050',acc:'#7a7be0',frame:'#ffffff',f:'Dreamy',st:['🐰','🧸','🎀','✨','🍓']},
+{id:'pink',n:'Pink Dream Room',d:'Hearts, flowers, blush',bg:'#fde0ea',ink:'#5a2840',acc:'#e0527e',frame:'#ffd3e2',f:'Pink',st:['💖','🌸','🎀','💌','🦋']},
+{id:'white',n:'Minimal White Studio',d:'Clean light, quiet borders',bg:'#f4f4f2',ink:'#222',acc:'#111',frame:'#ffffff',f:'Original',st:['✦','○','＋','★','♡']},
+{id:'neon',n:'Neon Party Room',d:'Dark, glowing, loud',bg:'#16102b',ink:'#f2e9ff',acc:'#ff3df0',frame:'#2b1a55',f:'Cool',st:['⚡','🪩','🔥','💜','🎉']},
+{id:'film',n:'Vintage Film Room',d:'Grain, date stamps, analog',bg:'#2a2622',ink:'#efe6d6',acc:'#e8a63a',frame:'#111111',f:'Film',st:['🎞️','📼','☀️','🍂','✉️']},
+{id:'couple',n:'Romantic Couple Room',d:'Two of you, lots of hearts',bg:'#f9d6d6',ink:'#4a1f2a',acc:'#c2263f',frame:'#fff0f0',f:'Warm',st:['❤️','💍','🌹','💏','🥂']},
+{id:'friends',n:'Best Friends Room',d:'Loud colours, group fun',bg:'#fff1b8',ink:'#3a3000',acc:'#ff6b35',frame:'#ffffff',f:'Original',st:['🤪','🎈','🌈','✌️','🍕']},
+{id:'seasonal',n:'Seasonal Room',d:'Snow, pumpkins, blossoms',bg:'#dff1e6',ink:'#1f3b2c',acc:'#d9382f',frame:'#ffffff',f:'Original',st:['🎄','🎃','🌷','☃️','🎆']},
+];
+const BOOTHS=[
+{id:'classic',n:'Classic Strip',d:'Four shots in a vertical strip',n_:4,c:1,r:4,ar:1.33,pad:30,gap:18,foot:90,e:'🎞️'},
+{id:'k4',n:'Korean 4-Cut',d:'2×2 portrait cuts with a title',n_:4,c:2,r:2,ar:.8,pad:34,gap:20,foot:120,e:'🐰'},
+{id:'film',n:'Retro Film',d:'Dark film strip, orange date',n_:4,c:1,r:4,ar:1.5,pad:36,gap:14,foot:70,e:'📼',film:1},
+{id:'pol',n:'Polaroid',d:'One big instant photo',n_:1,c:1,r:1,ar:1,pad:36,gap:0,foot:150,e:'📷'},
+{id:'sq',n:'Square 6',d:'Six squares, no fuss',n_:6,c:2,r:3,ar:1,pad:24,gap:14,foot:80,e:'⬜'},
+{id:'free',n:'Free Style',d:'Choose 1–8 photos',n_:4,c:2,r:2,ar:1,pad:30,gap:16,foot:90,e:'✨',free:1},
+];
+const FILTERS={Original:'none',Vintage:'sepia(.35) contrast(1.05) saturate(1.2)',Warm:'sepia(.2) saturate(1.3) brightness(1.05)',Cool:'saturate(1.1) hue-rotate(12deg) brightness(1.03)','B&W':'grayscale(1) contrast(1.15)',Dreamy:'brightness(1.12) contrast(.9) saturate(1.2) blur(.6px)',Film:'contrast(1.1) saturate(.85) sepia(.15)',Fade:'contrast(.85) brightness(1.1) saturate(.8)',Pink:'sepia(.25) hue-rotate(-30deg) saturate(1.5) brightness(1.08)'};
+const COLORS=['#ffffff','#ffd3e2','#e9d8ff','#cfe8ff','#fff2b8','#c9f6d3','#111111','#f1ddbb'];
+const PATS=['Solid','Dots','Stripes','Hearts','Stars'];
+const POSES=['Peace sign ✌️','Heart hands 🫶','Funny face 🤪','Look at each other','Serious model face','Close-up selfie','Double peace signs','Big laugh'];
+let S={room:ROOMS[0],booth:BOOTHS[0],n:4,shots:[],sel:0,filter:'Original',frame:'#ffffff',pat:'Solid',cap:'',date:true,st:[],facing:'user',busy:false};
+let stream=null,imgs={};
+const P=document.createElement('canvas').getContext('2d');
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2200)}
+/* nav */
+const STEPS=['Room','Booth','Camera','Edit'];let cur=0;
+function go(n){if(cur===2&&n!==2)stopCam();cur=n;document.querySelectorAll('section').forEach((s,i)=>s.classList.toggle('show',i===n));
+ $('#nav').innerHTML='';STEPS.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t;b.className=i===n?'on':'';b.onclick=()=>{if(i<=1||S.booth)go(i)};$('#nav').appendChild(b)});
+ if(n===2)prepCam();if(n===3){draw();const c=$('#cv');c.classList.remove('print');void c.offsetWidth;c.classList.add('print')}scrollTo(0,0)}
+/* rooms & booths */
+function applyRoom(r){S.room=r;const d=document.documentElement.style;
+ const forced=document.documentElement.dataset.theme;
+ d.setProperty('--bg',r.bg);d.setProperty('--ink',r.ink);d.setProperty('--acc',r.acc);
+ S.filter=r.f;S.frame=r.frame;S.st=S.st.slice();buildEd()}
+function buildRooms(){$('#rooms').innerHTML=ROOMS.map((r,i)=>`<button class="card" data-i="${i}"><div class="sw" style="background:${r.bg};color:${r.ink}">${r.st.slice(0,3).join(' ')}</div><b>${r.n}</b><span>${r.d}</span></button>`).join('');
+ $('#rooms').onclick=e=>{const c=e.target.closest('.card');if(!c)return;applyRoom(ROOMS[c.dataset.i]);go(1)}}
+function buildBooths(){$('#booths').innerHTML=BOOTHS.map((b,i)=>`<button class="card${b===S.booth?' on':''}" data-i="${i}"><div class="sw" style="background:var(--line)">${b.e}</div><b>${b.n}</b><span>${b.d}</span></button>`).join('');
+ $('#booths').onclick=e=>{const c=e.target.closest('.card');if(!c)return;S.booth=BOOTHS[c.dataset.i];S.n=S.booth.n_;if(S.booth.free){const n=+prompt('How many photos? (1–8)',4);S.n=Math.max(1,Math.min(8,n||4))}S.shots=[];S.sel=0;imgs={};buildBooths()}}
+/* layout */
+function lay(sc=1){const b=S.booth;let n=S.n,c=b.c,r=b.r;if(b.free){c=n<=2?1:n<=4?2:n<=6?3:4;c=n===1?1:n===2?1:2;if(n>4)c=n>6?4:3;r=Math.ceil(n/c)}
+ else if(b.id==='sq'){}
+ const cw=(b.id==='classic'||b.id==='film'?420:b.id==='pol'?560:340)*sc,ch=cw/b.ar,pad=b.pad*sc,gap=b.gap*sc,foot=b.foot*sc;
+ return{n,c,r,cw,ch,pad,gap,foot,W:pad*2+c*cw+(c-1)*gap,H:pad*2+r*ch+(r-1)*gap+foot}}
+/* drawing */
+function cover(ctx,im,x,y,w,h){const s=Math.max(w/im.width,h/im.height),sw=w/s,sh=h/s;ctx.drawImage(im,(im.width-sw)/2,(im.height-sh)/2,sw,sh,x,y,w,h)}
+function render(cv,sc=1,ui=true){const L=lay(sc),b=S.booth,ctx=cv.getContext('2d');cv.width=Math.round(L.W);cv.height=Math.round(L.H);
+ const film=b.film;ctx.fillStyle=film?'#111':S.frame;ctx.fillRect(0,0,L.W,L.H);
+ if(!film)pattern(ctx,L,sc);
+ for(let i=0;i<L.n;i++){const col=i%L.c,row=Math.floor(i/L.c),x=L.pad+col*(L.cw+L.gap),y=L.pad+row*(L.ch+L.gap);
+  const im=imgs[i];if(im){ctx.save();ctx.beginPath();ctx.rect(x,y,L.cw,L.ch);ctx.clip();ctx.filter=FILTERS[S.filter]||'none';cover(ctx,im,x,y,L.cw,L.ch);ctx.restore();ctx.filter='none'}
+  else{ctx.fillStyle='#0001';ctx.fillRect(x,y,L.cw,L.ch);ctx.fillStyle='#0006';ctx.font=`${28*sc}px Bricolage Grotesque,sans-serif`;ctx.textAlign='center';ctx.fillText('Photo '+(i+1),x+L.cw/2,y+L.ch/2)}}
+ const fy=L.H-L.foot/2,ink=film||isDark(S.frame)?'#f3ead8':'#3a2a3a';
+ ctx.textAlign='center';ctx.fillStyle=ink;
+ if(S.cap){ctx.font=`600 ${44*sc}px Caveat,cursive`;ctx.fillText(S.cap,L.W/2,fy+(S.date?4*sc:14*sc))}
+ if(S.date){ctx.font=`${20*sc}px Bricolage Grotesque,sans-serif`;ctx.fillStyle=film?'#ff9a2e':ink;ctx.globalAlpha=.8;ctx.fillText(new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}),L.W/2,fy+(S.cap?34*sc:8*sc));ctx.globalAlpha=1}
+ ctx.textBaseline='middle';S.st.forEach(s=>{ctx.font=`${s.s*L.W}px sans-serif`;ctx.fillText(s.e,s.x*L.W,s.y*L.H)});ctx.textBaseline='alphabetic'}
+function isDark(h){const n=parseInt(h.slice(1),16);return((n>>16)*.3+((n>>8)&255)*.6+(n&255)*.1)<90}
+function pattern(ctx,L,sc){if(S.pat==='Solid')return;ctx.save();ctx.globalAlpha=.25;ctx.fillStyle=S.room.acc;ctx.strokeStyle=S.room.acc;const g=44*sc;
+ if(S.pat==='Stripes'){ctx.lineWidth=10*sc;for(let x=-L.H;x<L.W;x+=g){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+L.H*.3,L.H);ctx.stroke()}}
+ else{const ch={Dots:'●',Hearts:'♥',Stars:'★'}[S.pat];ctx.font=`${22*sc}px sans-serif`;ctx.textAlign='center';for(let y=g/2;y<L.H;y+=g)for(let x=g/2+((y/g|0)%2)*g/2;x<L.W;x+=g)ctx.fillText(ch,x,y)}ctx.restore()}
+function loadImgs(){imgs={};S.shots.forEach((u,i)=>{if(!u)return;const im=new Image();im.onload=()=>{imgs[i]=im;if(cur===3)draw()};im.src=u})}
+function draw(){render($('#cv'))}
+/* camera */
+function ar(){return lay().cw/lay().ch}
+function prepCam(){$('#stage').style.setProperty('--ar',ar());buildSlots();$('#pose').textContent='Pose idea: '+POSES[Math.random()*POSES.length|0];
+ $('#n2').disabled=!S.shots.some(Boolean)}
+function buildSlots(){const el=$('#slots');el.style.setProperty('--ar',ar());el.innerHTML='';for(let i=0;i<S.n;i++){const d=document.createElement('div');d.className='slot'+(i===S.sel?' sel':'');d.tabIndex=0;if(S.shots[i])d.style.backgroundImage=`url(${S.shots[i]})`;else d.textContent=i+1;
+ if(S.shots[i]){const u=document.createElement('u');u.textContent='✕';u.title='Delete';u.onclick=e=>{e.stopPropagation();S.shots[i]=null;delete imgs[i];buildSlots()};d.appendChild(u)}
+ d.onclick=()=>{S.sel=i;buildSlots()};el.appendChild(d)}
+ $('#n2').disabled=!S.shots.some(Boolean)}
+async function startCam(devId){stopCam();
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('#msg').textContent='This browser can’t open a camera here. Use “Upload instead”.';$('#msg').style.display='flex';return}
+ try{stream=await navigator.mediaDevices.getUserMedia({video:devId?{deviceId:{exact:devId},width:{ideal:1280}}:{facingMode:S.facing,width:{ideal:1280}},audio:false});
+  $('#v').srcObject=stream;$('#msg').style.display='none';$('#cam').textContent='Turn off camera';$('#cam').classList.remove('on');
+  const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+  $('#dev').innerHTML=ds.map((d,i)=>`<option value="${d.deviceId}">${d.label||'Camera '+(i+1)}</option>`).join('');
+  const t=stream.getVideoTracks()[0].getSettings();if(t.deviceId)$('#dev').value=t.deviceId;mirror()}
+ catch(e){$('#msg').style.display='flex';$('#msg').textContent=(e.name==='NotAllowedError'?'Camera permission was blocked. Allow camera access in your browser’s address bar, then try again — or upload photos instead.':e.name==='NotFoundError'?'No camera found on this device. Use “Upload instead”.':'Couldn’t start the camera ('+e.name+'). Use “Upload instead”.')}}
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}const v=$('#v');if(v)v.srcObject=null;$('#cam').textContent='Turn on camera';$('#cam').classList.add('on');$('#msg').style.display='flex';$('#msg').textContent='Camera is off. Press “Turn on camera”.'}
+function mirror(){$('#v').classList.toggle('mir',$('#mi').checked&&S.facing==='user')}
+function beep(f,d){if(!$('#snd').checked)return;try{const a=beep.a||(beep.a=new AudioContext()),o=a.createOscillator(),g=a.createGain();o.frequency.value=f;g.gain.value=.08;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d)}catch(e){}}
+function crop(src,sw,sh,flip){const w=800,h=Math.round(w/ar()),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+ if(flip){x.translate(w,0);x.scale(-1,1)}cover(x,{width:sw,height:sh,get _(){return 0}},0,0,w,h);return c}
+function snapFrom(src,sw,sh,flip){const w=800,h=Math.round(w/ar()),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+ if(flip){x.translate(w,0);x.scale(-1,1)}const s=Math.max(w/sw,h/sh),cw=w/s,ch=h/s;x.drawImage(src,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,w,h);return c.toDataURL('image/jpeg',.9)}
+async function shot(i){const v=$('#v');S.shots[i]=snapFrom(v,v.videoWidth,v.videoHeight,$('#mi').checked&&S.facing==='user');
+ const f=$('#fl');f.style.transition='none';f.style.opacity=1;requestAnimationFrame(()=>{f.style.transition='opacity .35s';f.style.opacity=0});beep(900,.12);loadImgs();buildSlots()}
+async function count(t){const cd=$('#cd');for(let k=t;k>0;k--){cd.textContent=k;cd.classList.remove('pop');void cd.offsetWidth;cd.classList.add('pop');beep(500,.08);await new Promise(r=>setTimeout(r,1000))}cd.textContent=''}
+async function session(only){if(!stream){toast('Turn on the camera first');return}if(S.busy)return;S.busy=true;$('#go').disabled=true;
+ const t=+$('#tm').value;const idx=only!=null?[only]:[...Array(S.n).keys()].filter(i=>!S.shots[i]||S.shots.every(Boolean));
+ const list=only!=null?idx:(S.shots.every(Boolean)?[...Array(S.n).keys()]:idx);
+ for(const i of list){if(!stream)break;S.sel=i;buildSlots();await count(t);if(!stream)break;await shot(i);await new Promise(r=>setTimeout(r,700))}
+ S.busy=false;$('#go').disabled=false;prepCam();if(S.shots.filter(Boolean).length===S.n)toast('Strip ready — hit Edit & print')}
+/* editor */
+function chips(el,items,cb,get){const e=$(el);e.innerHTML='';items.forEach(it=>{const b=document.createElement('button');if(typeof it==='object'){b.className='sw2';b.style.background=it.c;b.title=it.c}else b.textContent=it;b.onclick=()=>{cb(it);buildEd()};if(get&&get(it))b.classList.add('on');e.appendChild(b)})}
+function buildEd(){chips('#fil',Object.keys(FILTERS),f=>{S.filter=f;draw()},f=>f===S.filter);
+ chips('#frc',COLORS.map(c=>({c})),o=>{S.frame=o.c;draw()},o=>o.c===S.frame);
+ chips('#pat',PATS,p=>{S.pat=p;draw()},p=>p===S.pat);
+ const sts=[...S.room.st,'✨','💖','🌟','🦋','🍒'];const e=$('#stk');e.innerHTML='';sts.forEach(s=>{const b=document.createElement('button');b.className='st';b.textContent=s;b.onclick=()=>{S.st.push({e:s,x:.2+Math.random()*.6,y:.15+Math.random()*.6,s:.12});draw()};e.appendChild(b)})}
+let drag=null;const cv=$('#cv');
+function pt(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height}}
+function hit(p){const k=cv.width/cv.height;for(let i=S.st.length-1;i>=0;i--){const s=S.st[i];if(Math.abs(s.x-p.x)<s.s/2&&Math.abs(s.y-p.y)<s.s/2*k)return i}return -1}
+cv.onpointerdown=e=>{const i=hit(pt(e));if(i>=0){drag=i;cv.setPointerCapture(e.pointerId)}};
+cv.onpointermove=e=>{if(drag===null)return;const p=pt(e);S.st[drag].x=p.x;S.st[drag].y=p.y;draw()};
+cv.onpointerup=()=>drag=null;
+cv.ondblclick=e=>{const i=hit(pt(e));if(i>=0){S.st.splice(i,1);draw()}};
+cv.onwheel=e=>{const i=hit(pt(e));if(i>=0){e.preventDefault();S.st[i].s=Math.max(.05,Math.min(.5,S.st[i].s*(e.deltaY<0?1.1:.9)));draw()}};
+function exportURL(type,sc){const c=document.createElement('canvas');render(c,sc);return c.toDataURL('image/'+type,.92)}
+/* gallery */
+function gallery(){try{return JSON.parse(localStorage.getItem('lps')||'[]')}catch(e){return[]}}
+function showGal(){const g=gallery();$('#gal').innerHTML=g.length?'':'<p>Nothing saved yet. Finish a strip and press “Save to gallery”.</p>';
+ g.forEach((u,i)=>{const d=document.createElement('div');d.innerHTML=`<img src="${u}" alt="Saved photo ${i+1}"><div class="row"><a href="${u}" download="photo-${i+1}.jpg"><button>Download</button></a><button data-d="${i}">Delete</button></div>`;d.querySelector('[data-d]').onclick=()=>{const a=gallery();a.splice(i,1);localStorage.setItem('lps',JSON.stringify(a));showGal()};$('#gal').appendChild(d)});$('#gd').showModal()}
+/* wire up */
+$('#b1').onclick=()=>go(0);$('#n1').onclick=()=>go(2);$('#n2').onclick=()=>{loadImgs();go(3)};$('#bk').onclick=()=>go(2);
+$('#cam').onclick=()=>stream?stopCam():startCam();
+$('#flip').onclick=()=>{S.facing=S.facing==='user'?'environment':'user';if(stream)startCam()};
+$('#dev').onchange=e=>startCam(e.target.value);$('#mi').onchange=mirror;
+$('#fs').onclick=()=>{const s=$('#stage');document.fullscreenElement?document.exitFullscreen():s.requestFullscreen&&s.requestFullscreen()};
+$('#go').onclick=()=>session();$('#one').onclick=()=>session(S.sel);
+$('#clr').onclick=()=>{S.shots=[];imgs={};S.sel=0;buildSlots()};
+$('#up').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{const fs=[...e.target.files];let i=S.shots.findIndex(x=>!x);if(i<0)i=0;for(const f of fs){if(i>=S.n)break;const im=await new Promise(r=>{const m=new Image();m.onload=()=>r(m);m.src=URL.createObjectURL(f)});S.shots[i]=snapFrom(im,im.width,im.height,false);i++}e.target.value='';loadImgs();buildSlots()};
+$('#cap').oninput=e=>{S.cap=e.target.value;draw()};$('#dt').onchange=e=>{S.date=e.target.checked;draw()};
+$('#rs').onclick=()=>{S.st.pop();draw()};
+$('#rnd').onclick=()=>{const f=Object.keys(FILTERS);S.filter=f[Math.random()*f.length|0];S.frame=COLORS[Math.random()*COLORS.length|0];S.pat=PATS[Math.random()*PATS.length|0];buildEd();draw()};
+$('#dl').onclick=()=>{if(!S.shots.some(Boolean)){toast('Take or upload a photo first');return}const t=$('#fmt').value,u=exportURL(t,+$('#qs').value),a=document.createElement('a');a.href=u;a.download='photobooth.'+(t==='jpeg'?'jpg':'png');a.click();toast('Downloaded')};
+$('#sv').onclick=()=>{if(!S.shots.some(Boolean)){toast('Take or upload a photo first');return}try{const g=gallery();g.unshift(exportURL('jpeg',.8));localStorage.setItem('lps',JSON.stringify(g.slice(0,10)));toast('Saved to this browser')}catch(e){toast('Storage is full — delete some saved photos')}};
+$('#gbtn').onclick=showGal;$('#gx').onclick=()=>$('#gd').close();
+$('#tbtn').onclick=()=>{const r=document.documentElement,d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark';['--bg','--ink','--acc'].forEach(k=>r.style.removeProperty(k));if(!d){}else applyRoom(S.room)};
+addEventListener('pagehide',stopCam);
+buildRooms();buildBooths();buildEd();go(0);
+</script></body></html>
